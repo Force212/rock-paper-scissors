@@ -1,68 +1,89 @@
-// Step 2: Get the computer's choice
-function getComputerChoice() {
-    const randomNumber = Math.random();
-    if (randomNumber < 0.33) {
-        return "rock";
-    } else if (randomNumber < 0.66) {
-        return "paper";
-    } else {
-        return "scissors";
-    }
-}
-
-// Step 3: Get the human's choice
-function getHumanChoice() {
-    const choice = prompt("Enter your choice (rock, paper, or scissors):").toLowerCase();
-    return choice;
-}
-
-// Step 4: Declare the scores
 let humanScore = 0;
 let computerScore = 0;
 
-// Step 5: Play a single round
-function playRound(humanChoice, computerChoice) {
-    humanChoice = humanChoice.toLowerCase();
+// Функция для выбора компьютера
+function getComputerChoice() {
+    const choices = ["rock", "paper", "scissors"];
+    const randomIndex = Math.floor(Math.random() * 3);
+    return choices[randomIndex];
+}
+
+// Обновление интерфейса
+function updateUI(resultMessage) {
+    document.getElementById("result").textContent = resultMessage;
+    document.getElementById("scores").textContent = `Scores: Human: ${humanScore} | Computer: ${computerScore}`;
+}
+
+// Проверка победителя игры
+function checkWinner() {
+    if (humanScore === 5) {
+        document.getElementById("status").textContent = "🎉 You win the game! 🎉";
+        showRestartButton();
+        return true;
+    } else if (computerScore === 5) {
+        document.getElementById("status").textContent = "🤖 The computer wins the game! 🤖";
+        showRestartButton();
+        return true;
+    }
+    return false;
+}
+
+// Показать кнопку "Play Again"
+function showRestartButton() {
+    document.getElementById("restart").style.display = "block";
+    document.querySelectorAll(".buttons button").forEach(button => {
+        button.disabled = true; // Отключаем кнопки выбора
+    });
+}
+
+// Скрыть кнопку "Play Again"
+function hideRestartButton() {
+    document.getElementById("restart").style.display = "none";
+    document.querySelectorAll(".buttons button").forEach(button => {
+        button.disabled = false; // Включаем кнопки выбора
+    });
+}
+
+// Логика одного раунда
+function playRound(humanChoice) {
+    if (humanScore === 5 || computerScore === 5) return; // Игра завершена
+
+    const computerChoice = getComputerChoice();
+    let resultMessage;
 
     if (humanChoice === computerChoice) {
-        console.log(`It's a tie! Both chose ${humanChoice}.`);
-        return;
-    }
-
-    if (
+        resultMessage = "It's a tie!";
+    } else if (
         (humanChoice === "rock" && computerChoice === "scissors") ||
         (humanChoice === "paper" && computerChoice === "rock") ||
         (humanChoice === "scissors" && computerChoice === "paper")
     ) {
-        console.log(`You win! ${humanChoice} beats ${computerChoice}.`);
+        resultMessage = `You win! ${humanChoice} beats ${computerChoice}.`;
         humanScore++;
     } else {
-        console.log(`You lose! ${computerChoice} beats ${humanChoice}.`);
+        resultMessage = `You lose! ${computerChoice} beats ${humanChoice}.`;
         computerScore++;
     }
+
+    updateUI(resultMessage);
+
+    // Проверяем, есть ли победитель
+    if (checkWinner()) {
+        return;
+    }
 }
 
-// Step 6: Play the entire game
-function playGame() {
+// Перезапуск игры
+document.getElementById("restart").addEventListener("click", () => {
     humanScore = 0;
     computerScore = 0;
+    document.getElementById("status").textContent = "Choose your move:";
+    document.getElementById("result").textContent = "";
+    updateUI("Let's play again!");
+    hideRestartButton();
+});
 
-    for (let i = 0; i < 5; i++) {
-        console.log(`--- Round ${i + 1} ---`);
-        const humanSelection = getHumanChoice();
-        const computerSelection = getComputerChoice();
-        playRound(humanSelection, computerSelection);
-        console.log(`Current Scores - Human: ${humanScore}, Computer: ${computerScore}`);
-    }
-
-    if (humanScore > computerScore) {
-        console.log(" You win the game! ");
-    } else if (humanScore < computerScore) {
-        console.log(" The computer wins the game! ");
-    } else {
-        console.log(" It's a tie! ");
-    }
-}
-
-// Start the game
-playGame();
+// Обработка выбора человека
+document.getElementById("rock").addEventListener("click", () => playRound("rock"));
+document.getElementById("paper").addEventListener("click", () => playRound("paper"));
+document.getElementById("scissors").addEventListener("click", () => playRound("scissors"));
